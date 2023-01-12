@@ -1,5 +1,5 @@
 #include "arena.h"
-#include "../vendor/logging.h"
+#include "logging.h"
 
 #include <malloc.h>
 #include <Windows.h>

@@ -8,5 +8,6 @@ set(CMAKE_C_STANDARD 99)
 
 add_library(arena
 		"src/arena.c"
-		"vendor/logging.c"
+		"vendor/logging/logging.c"
 )
+target_include_directories(arena PUBLIC vendor/logging)
