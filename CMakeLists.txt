@@ -5,8 +5,9 @@ project(arena
 )
 
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_STATIC_LIBRARY_PREFIX "") # Have CMake output arena.a instead of libarena.a
 
-add_library(arena
+add_library(arena STATIC
 		"src/arena.c"
 		"vendor/logging/logging.c"
 )
