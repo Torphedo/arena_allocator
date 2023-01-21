@@ -2,7 +2,9 @@
 #include "logging.h"
 
 #include <malloc.h>
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 arena_t* create_arena(uint64_t size, arena_mode mode, uint64_t reserve_size)
 {
@@ -32,6 +34,7 @@ arena_t* create_arena(uint64_t size, arena_mode mode, uint64_t reserve_size)
             }
             arena->size = size;
             break;
+        #ifdef _WIN32
         case RESERVE:
             if (reserve_size == 0) {reserve_size = 0x800000000;} // 32GB
             arena->reserve_size = reserve_size;
@@ -55,6 +58,7 @@ arena_t* create_arena(uint64_t size, arena_mode mode, uint64_t reserve_size)
                 }
                 break;
             }
+        #endif
         default:
             return NULL;
     }
@@ -67,6 +71,7 @@ void destroy_arena(arena_t* arena)
         case ALLOCATE_ALL:
             free(arena->base_addr);
             break;
+        #ifdef _WIN32
         case RESERVE:
             SetLastError(0);
             VirtualFree(arena->base_addr, 0, MEM_RELEASE);
@@ -76,6 +81,7 @@ void destroy_arena(arena_t* arena)
                 log_error(CRITICAL, "destroy_arena(): Error freeing arena! Code: %lli (0x%x)\n", error, error);
             }
             break;
+        #endif
     }
     free(arena);
 }
@@ -87,6 +93,7 @@ unsigned int expand_arena(arena_t* arena, uint64_t expand_size)
         log_error(WARNING, "expand_arena() invalid parameter: arena mode must be RESERVE!\n");
         return 0;
     }
+    #ifdef _WIN32
     else if ((arena->base_addr + arena->reserve_size) >= (arena->base_addr + arena->size + expand_size))
     {
         VirtualAlloc(arena->base_addr + arena->size, expand_size, MEM_COMMIT, PAGE_READWRITE);
@@ -95,6 +102,7 @@ unsigned int expand_arena(arena_t* arena, uint64_t expand_size)
         arena->size += expand_size;
         return expand_size;
     }
+    #endif
     else
     {
         log_error(CRITICAL, "expand_arena(): Not enough reserved virtual memory to expand the arena by the requested %lli bytes!\n", expand_size);
